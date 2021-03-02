@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Loader from 'react-loader-spinner';
+import Container from './components/Container';
 import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
 import Button from './components/Button';
+import Modal from './components/Modal';
+import ImgOnModal from './components/ImgOnModal';
+import TitleOnError from './components/TitleOnError';
 import newImagesApi from './services/images-api';
-
-import './App.css';
 
 class App extends Component {
   state = {
@@ -16,6 +18,8 @@ class App extends Component {
     totalImages: null,
     isLoading: false,
     error: null,
+    showModal: false,
+    bigImageUrl: null,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -57,17 +61,35 @@ class App extends Component {
       .finally(() => this.setState({ isLoading: false }));
   };
 
+  toggleModal = () => {
+    this.setState(prevState => ({ showModal: !prevState.showModal }));
+  };
+
+  handleOpenModal = url => {
+    this.setState({ bigImageUrl: url });
+    this.toggleModal();
+  };
+
   render() {
-    const { images, isLoading, totalImages, error } = this.state;
+    const {
+      images,
+      isLoading,
+      totalImages,
+      error,
+      showModal,
+      bigImageUrl,
+    } = this.state;
 
     const shouldRenderLoadMoreButton =
       images.length > 0 && !isLoading && images.length !== totalImages;
 
     return (
-      <div className="App">
+      <Container>
         <Searchbar onSubmit={this.handleFormSubmit} />
-        {error && <h1>Oops, something went wrong!!!</h1>}
-        <ImageGallery images={images} />
+        {error && <TitleOnError />}
+
+        <ImageGallery images={images} onOpenModal={this.handleOpenModal} />
+
         {shouldRenderLoadMoreButton && (
           <Button handleOnClick={this.fetchImages} />
         )}
@@ -78,10 +100,16 @@ class App extends Component {
             color="#3f51b5"
             height={50}
             width={80}
-            className="Loader"
+            style={{ display: 'flex', justifyContent: 'center' }}
           />
         )}
-      </div>
+
+        {showModal && (
+          <Modal onCloseModal={this.toggleModal}>
+            <ImgOnModal url={bigImageUrl} onBtnCloseModal={this.toggleModal} />
+          </Modal>
+        )}
+      </Container>
     );
   }
 }
