@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ImageGalleryItem from './ImageGalleryItem';
-import './ImageGallery.css';
+import './ImageGallery.scss';
 
 const ImageGallery = ({ images, onOpenModal }) => (
   <ul className="ImageGallery">
