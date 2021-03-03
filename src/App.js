@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Loader from 'react-loader-spinner';
+import { CircleArrow as ScrollUpButton } from 'react-scroll-up-button';
 import Container from './components/Container';
 import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
@@ -110,6 +111,8 @@ class App extends Component {
             <ModalImg url={bigImageUrl} onBtnCloseModal={this.toggleModal} />
           </Modal>
         )}
+
+        {!showModal && <ScrollUpButton />}
       </Container>
     );
   }
