@@ -12,6 +12,7 @@ const ImageGalleryItem = ({ url, title, onOpenModal }) => (
 
 ImageGalleryItem.defaultProps = {
   url: defaultImg,
+  title: 'type__photo',
 };
 
 export default ImageGalleryItem;

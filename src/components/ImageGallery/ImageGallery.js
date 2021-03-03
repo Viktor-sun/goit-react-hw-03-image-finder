@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import ImageGalleryItem from './ImageGalleryItem';
 import './ImageGallery.css';
 
@@ -15,5 +16,17 @@ const ImageGallery = ({ images, onOpenModal }) => (
     ))}
   </ul>
 );
+
+ImageGallery.propTypes = {
+  images: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      webformatURL: PropTypes.string,
+      largeImageURL: PropTypes.string,
+      tags: PropTypes.string,
+    }),
+  ).isRequired,
+  onOpenModal: PropTypes.func.isRequired,
+};
 
 export default ImageGallery;

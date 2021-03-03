@@ -6,7 +6,7 @@ import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
 import Button from './components/Button';
 import Modal from './components/Modal';
-import ImgOnModal from './components/ImgOnModal';
+import ModalImg from './components/ModalImg';
 import TitleOnError from './components/TitleOnError';
 import newImagesApi from './services/images-api';
 
@@ -106,7 +106,7 @@ class App extends Component {
 
         {showModal && (
           <Modal onCloseModal={this.toggleModal}>
-            <ImgOnModal url={bigImageUrl} onBtnCloseModal={this.toggleModal} />
+            <ModalImg url={bigImageUrl} onBtnCloseModal={this.toggleModal} />
           </Modal>
         )}
       </Container>
