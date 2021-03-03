@@ -35,6 +35,7 @@ class App extends Component {
       images: [],
       totalImages: null,
       error: null,
+      bigImageUrl: null,
     });
   };
 
@@ -50,7 +51,7 @@ class App extends Component {
           totalImages: totalHits,
         }));
 
-        if (images.length > 12) {
+        if (images.length > 11) {
           window.scrollTo({
             top: document.documentElement.scrollHeight,
             behavior: 'smooth',
