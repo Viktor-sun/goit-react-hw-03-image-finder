@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import Loader from 'react-loader-spinner';
 import { CircleArrow as ScrollUpButton } from 'react-scroll-up-button';
@@ -11,111 +11,88 @@ import ModalImg from './components/ModalImg';
 import TitleOnError from './components/TitleOnError';
 import newImagesApi from './services/images-api';
 
-class App extends Component {
-  state = {
-    currentPage: 1,
-    searchQuery: '',
-    images: [],
-    totalImages: null,
-    isLoading: false,
-    error: null,
-    showModal: false,
-    bigImageUrl: null,
+export default function App() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [totalImages, setTotalImages] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [bigImageUrl, setBigImageUrl] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchImages = () => {
+      setIsLoading(true);
+
+      newImagesApi(searchQuery, currentPage)
+        .then(({ hits, totalHits }) => {
+          setImages(prevImages => [...prevImages, ...hits]);
+          setTotalImages(totalHits);
+
+          // if (images.length > 11) {
+          //   window.scrollTo({
+          //     top: document.documentElement.scrollHeight,
+          //     behavior: 'smooth',
+          //   });
+          // }
+        })
+        .catch(error => setError(error))
+        .finally(() => setIsLoading(false));
+    };
+
+    fetchImages();
+  }, [searchQuery, currentPage]);
+
+  const setPage = () => setCurrentPage(prevPage => prevPage + 1);
+
+  const handleFormSubmit = query => {
+    setCurrentPage(1);
+    setSearchQuery(query);
+    setImages([]);
+    setTotalImages(null);
+    setBigImageUrl(null);
+    setError(null);
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.searchQuery !== this.state.searchQuery) {
-      this.fetchImages();
-    }
-  }
-
-  handleFormSubmit = query => {
-    this.setState({
-      currentPage: 1,
-      searchQuery: query,
-      images: [],
-      totalImages: null,
-      error: null,
-      bigImageUrl: null,
-    });
+  const toggleModal = () => {
+    setShowModal(prevShowModal => !prevShowModal);
   };
 
-  fetchImages = () => {
-    const { searchQuery, currentPage, images } = this.state;
-    this.setState({ isLoading: true });
-
-    newImagesApi(searchQuery, currentPage)
-      .then(({ hits, totalHits }) => {
-        this.setState(prevState => ({
-          images: [...prevState.images, ...hits],
-          currentPage: prevState.currentPage + 1,
-          totalImages: totalHits,
-        }));
-
-        if (images.length > 11) {
-          window.scrollTo({
-            top: document.documentElement.scrollHeight,
-            behavior: 'smooth',
-          });
-        }
-      })
-      .catch(error => this.setState({ error }))
-      .finally(() => this.setState({ isLoading: false }));
+  const handleOpenModal = url => {
+    setBigImageUrl(url);
+    toggleModal();
   };
 
-  toggleModal = () => {
-    this.setState(prevState => ({ showModal: !prevState.showModal }));
-  };
+  const shouldRenderLoadMoreButton =
+    images.length > 0 && !isLoading && images.length !== totalImages;
 
-  handleOpenModal = url => {
-    this.setState({ bigImageUrl: url });
-    this.toggleModal();
-  };
+  return (
+    <Container>
+      <Searchbar onSubmit={handleFormSubmit} />
+      {error && <TitleOnError />}
 
-  render() {
-    const {
-      images,
-      isLoading,
-      totalImages,
-      error,
-      showModal,
-      bigImageUrl,
-    } = this.state;
+      <ImageGallery images={images} onOpenModal={handleOpenModal} />
 
-    const shouldRenderLoadMoreButton =
-      images.length > 0 && !isLoading && images.length !== totalImages;
+      {shouldRenderLoadMoreButton && <Button handleOnClick={setPage} />}
 
-    return (
-      <Container>
-        <Searchbar onSubmit={this.handleFormSubmit} />
-        {error && <TitleOnError />}
+      {isLoading && (
+        <Loader
+          type="ThreeDots"
+          color="#3f51b5"
+          height={50}
+          width={80}
+          style={{ display: 'flex', justifyContent: 'center' }}
+        />
+      )}
 
-        <ImageGallery images={images} onOpenModal={this.handleOpenModal} />
+      {showModal && (
+        <Modal onCloseModal={toggleModal}>
+          <ModalImg url={bigImageUrl} onBtnCloseModal={toggleModal} />
+        </Modal>
+      )}
 
-        {shouldRenderLoadMoreButton && (
-          <Button handleOnClick={this.fetchImages} />
-        )}
-
-        {isLoading && (
-          <Loader
-            type="ThreeDots"
-            color="#3f51b5"
-            height={50}
-            width={80}
-            style={{ display: 'flex', justifyContent: 'center' }}
-          />
-        )}
-
-        {showModal && (
-          <Modal onCloseModal={this.toggleModal}>
-            <ModalImg url={bigImageUrl} onBtnCloseModal={this.toggleModal} />
-          </Modal>
-        )}
-
-        {!showModal && <ScrollUpButton />}
-      </Container>
-    );
-  }
+      {!showModal && <ScrollUpButton />}
+    </Container>
+  );
 }
-
-export default App;
